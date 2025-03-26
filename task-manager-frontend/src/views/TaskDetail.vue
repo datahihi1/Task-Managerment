@@ -1,6 +1,6 @@
 <template>
     <div class="container mt-4">
-        <h2>📌 Chi Tiết Công Việc</h2>
+        <h2>Chi Tiết Công Việc</h2>
 
         <div v-if="loading">⏳ Đang tải...</div>
         <div v-else-if="task">
@@ -12,14 +12,13 @@
                 <span v-if="task.assigned_user">{{ task.assigned_user.name }}</span>
                 <span v-else>Chưa phân công</span>
             </p>
-
+            <p><strong>Trạng thái:</strong> {{ task.status }}</p>
             <button class="btn btn-secondary mt-3 me-2" @click="goBack">Quay lại</button>
             <button class="btn btn-warning mt-3 me-2" @click="editTask">Chỉnh sửa</button>
             <button class="btn btn-danger mt-3" @click="confirmDelete">🗑 Xóa</button>
         </div>
         <div v-else>Công việc không tồn tại!</div>
 
-        <!-- Modal xác nhận xóa -->
         <div v-if="showConfirmDelete" class="modal show d-block" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">

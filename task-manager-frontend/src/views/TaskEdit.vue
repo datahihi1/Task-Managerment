@@ -1,6 +1,6 @@
 <template>
     <div class="container mt-4">
-        <h2>✏️ Chỉnh sửa Công Việc</h2>
+        <h2>Chỉnh sửa Công Việc</h2>
         <form @submit.prevent="updateTask">
             <div class="mb-3">
                 <label class="form-label">Tiêu đề</label>
@@ -46,12 +46,19 @@ import api from '../api';
 
 const router = useRouter();
 const route = useRoute();
-const task = ref({});
+const task = ref({
+    title: '',
+    description: '',
+    due_date: '',
+    assigned_to: '',
+    status: 'pending',
+});
 const users = ref([]);
 
 const fetchTask = async () => {
     try {
         const response = await api.get(`/tasks/${route.params.id}`);
+        console.log('Fetched task:', response.data); // Debugging
         task.value = response.data;
     } catch (error) {
         console.error('Lỗi khi tải công việc:', error);
@@ -69,7 +76,7 @@ const fetchUsers = async () => {
 
 const updateTask = async () => {
     try {
-        // console.log('Updating task with data:', task.value);
+        // console.log('Updating task with data:', task.value); 
         const response = await api.put(`/tasks/${task.value.id}`, task.value);
         // console.log('Update response:', response);
         router.push('/tasks');

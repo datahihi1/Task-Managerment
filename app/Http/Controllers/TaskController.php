@@ -2,15 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TaskUpdated;
 use App\Models\Task;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tasks = Task::with('assignedUser:id,name')->get();
-        return response()->json($tasks);
+        $query = Task::query()->with('assignedUser:id,name');
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('status', $request->status);
+        }
+        if ($request->has('assigned_to_me') && $request->assigned_to_me) {
+            $query->where('assigned_to', $request->user()->id);
+        }
+        return response()->json($query->get());
     }
 
     public function store(Request $request)
@@ -22,7 +29,7 @@ class TaskController extends Controller
             'due_date' => 'nullable|date',
             'assigned_to' => 'nullable|exists:users,id',
         ]));
-
+        broadcast(new TaskUpdated($task))->toOthers();
         return response()->json($task, 201);
     }
 
@@ -37,11 +44,12 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'due_date' => 'nullable|date',
-            'assigned_to' => 'nullable|exists:users,id'
+            'assigned_to' => 'nullable|exists:users,id',
+            'status' => 'in:pending,in_progress,completed'
         ]);
     
         $task->update($validated);
-    
+        broadcast(new TaskUpdated($task))->toOthers();
         return response()->json($task);
     }
     
@@ -65,6 +73,7 @@ class TaskController extends Controller
         }
     
         $task->delete();
+        broadcast(new TaskUpdated($task))->toOthers();
         return response()->json(['message' => 'Công việc đã bị xóa']);
     }
     
